@@ -44,6 +44,9 @@ class LinearClassifier(object):
 
       #########################################################################
       # TODO:                                                                 #
+      batch_idx = np.random.choice(np.arange(num_train),batch_size,replace=True)
+      X_batch = X[batch_idx,:]
+      y_batch = y[batch_idx]
       # Sample batch_size elements from the training data and their           #
       # corresponding labels to use in this round of gradient descent.        #
       # Store the data in X_batch and their corresponding labels in           #
@@ -65,6 +68,7 @@ class LinearClassifier(object):
       # perform parameter update
       #########################################################################
       # TODO:                                                                 #
+      self.W += -learning_rate*grad
       # Update the weights using the gradient and the learning rate.          #
       #########################################################################
       pass
@@ -94,6 +98,9 @@ class LinearClassifier(object):
     y_pred = np.zeros(X.shape[0])
     ###########################################################################
     # TODO:                                                                   #
+    scores_y = np.dot(X,self.W)
+    y_pred = np.argmax(scores_y,1)
+
     # Implement this method. Store the predicted labels in y_pred.            #
     ###########################################################################
     pass
@@ -101,10 +108,10 @@ class LinearClassifier(object):
     #                           END OF YOUR CODE                              #
     ###########################################################################
     return y_pred
-  
+
   def loss(self, X_batch, y_batch, reg):
     """
-    Compute the loss function and its derivative. 
+    Compute the loss function and its derivative.
     Subclasses will override this.
 
     Inputs:
@@ -132,4 +139,3 @@ class Softmax(LinearClassifier):
 
   def loss(self, X_batch, y_batch, reg):
     return softmax_loss_vectorized(self.W, X_batch, y_batch, reg)
-
