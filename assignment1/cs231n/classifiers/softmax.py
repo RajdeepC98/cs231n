@@ -23,12 +23,29 @@ def softmax_loss_naive(W, X, y, reg):
   # Initialize the loss and gradient to zero.
   loss = 0.0
   dW = np.zeros_like(W)
-
+  num_train = X.shape[0]
+  num_class = W.shape[1]
   #############################################################################
   # TODO: Compute the softmax loss and its gradient using explicit loops.     #
   # Store the loss in loss and the gradient in dW. If you are not careful     #
   # here, it is easy to run into numeric instability. Don't forget the        #
   # regularization!                                                           #
+  for i in xrange(num_train):
+      score = np.dot(X[i,:],W)
+      score -= np.max(score)
+      loss += -score[y[i]] + np.log(np.sum(np.exp(score)))
+      for j in xrange(num_class):
+          p = np.exp(score[j])/np.sum(np.exp(score))
+          if j == y[i]:
+              dW[:,j] += (p - 1)*X[i,:]
+              continue
+
+          dW[:,j] += p*X[i,:]
+
+
+  loss /=num_train
+  loss += reg*np.sum(np.sum(W*W))
+  dW /=num_train
   #############################################################################
   pass
   #############################################################################
@@ -47,7 +64,19 @@ def softmax_loss_vectorized(W, X, y, reg):
   # Initialize the loss and gradient to zero.
   loss = 0.0
   dW = np.zeros_like(W)
+  scores = np.dot(X,W)
+  scores -= np.matrix(np.max(scores,1)).T
+  inv_sum_exp = 1./np.sum(np.exp(scores),1)
+  p_mat = np.multiply(np.exp(scores),np.matrix(inv_sum_exp).T)
 
+  loss_mat = -scores[xrange(X.shape[0]),y] + np.log(np.sum(np.exp(scores),1))
+  loss = np.sum(np.matrix(loss_mat))
+  loss += reg*np.sum(np.sum(W * W))
+  loss /=X.shape[0]
+
+  p_mat[xrange(X.shape[0]),y] -= 1
+  dW = np.dot(X.T,p_mat)
+  dW /=X.shape[0]
   #############################################################################
   # TODO: Compute the softmax loss and its gradient using no explicit loops.  #
   # Store the loss in loss and the gradient in dW. If you are not careful     #
@@ -60,4 +89,3 @@ def softmax_loss_vectorized(W, X, y, reg):
   #############################################################################
 
   return loss, dW
-
