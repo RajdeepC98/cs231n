@@ -25,12 +25,11 @@ def affine_forward(x, w, b):
     # TODO: Implement the affine forward pass. Store the result in out. You   #
     # will need to reshape the input into rows.;
     dims = x.shape
-    D = 1
-    for i in range(1, len(dims)):
-        D *= dims[i]
+    D = w.shape[0]
 
     x = np.reshape(x, (dims[0], D))                               #
     out = x.dot(w) + b
+    x = np.reshape(x, dims)
     ###########################################################################
     pass
     ###########################################################################
@@ -59,6 +58,14 @@ def affine_backward(dout, cache):
     dx, dw, db = None, None, None
     ###########################################################################
     # TODO: Implement the affine backward pass.                               #
+    dx = dout.dot(w.T)
+    dx = np.reshape(dx, x.shape)
+
+    D = w.shape[0]
+    dw = ((np.reshape(x,(x.shape[0], D))).T).dot(dout)
+
+    db = np.sum(dout, axis=0)
+
     ###########################################################################
     pass
     ###########################################################################
@@ -81,6 +88,7 @@ def relu_forward(x):
     out = None
     ###########################################################################
     # TODO: Implement the ReLU forward pass.                                  #
+    out = np.maximum(0, x)
     ###########################################################################
     pass
     ###########################################################################
@@ -104,6 +112,8 @@ def relu_backward(dout, cache):
     dx, x = None, cache
     ###########################################################################
     # TODO: Implement the ReLU backward pass.                                 #
+    indc = x>0
+    dx = np.multiply(dout, indc)
     ###########################################################################
     pass
     ###########################################################################

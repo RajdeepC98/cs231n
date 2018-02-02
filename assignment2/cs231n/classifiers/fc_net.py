@@ -46,6 +46,10 @@ class TwoLayerNet(object):
         # biases should be stored in the dictionary self.params, with first layer  #
         # weights and biases using the keys 'W1' and 'b1' and second layer weights #
         # and biases using the keys 'W2' and 'b2'.                                 #
+        self.params['W1'] = weight_scale*np.random.randn(input_dim, hidden_dim)
+        self.params['b1'] = np.zeros(hidden_dim)
+        self.params['W2'] = weight_scale*np.random.randn(hidden_dim, num_classes)
+        self.params['b2'] = np.zeros(num_classes)
         ############################################################################
         pass
         ############################################################################
@@ -76,6 +80,8 @@ class TwoLayerNet(object):
         ############################################################################
         # TODO: Implement the forward pass for the two-layer net, computing the    #
         # class scores for X and storing them in the scores variable.              #
+        hidden_scores, cache1 = affine_relu_forward(X, self.params['W1'], self.params['b1'])
+        scores, cache2 = affine_forward(hidden_scores, self.params['W2'], self.params['b2'])
         ############################################################################
         pass
         ############################################################################
@@ -96,6 +102,16 @@ class TwoLayerNet(object):
         # NOTE: To ensure that your implementation matches ours and you pass the   #
         # automated tests, make sure that your L2 regularization includes a factor #
         # of 0.5 to simplify the expression for the gradient.                      #
+
+        data_loss, dhidden = softmax_loss(scores, y)
+        reg_loss = self.reg*0.5*(np.sum(self.params['W1']**2) + np.sum(self.params['W2']**2))
+        loss = data_loss + reg_loss
+
+        drelu, grads['W2'], grads['b2'] = affine_backward(dhidden, cache2)
+        _, grads['W1'], grads['b1'] = affine_relu_backward(drelu, cache1)
+
+        grads['W1'] += self.reg*(self.params['W1'])
+        grads['W2'] += self.reg*(self.params['W2'])
         ############################################################################
         pass
         ############################################################################
